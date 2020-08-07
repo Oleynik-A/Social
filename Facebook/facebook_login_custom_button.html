@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Facebook Login JavaScript Example</title>
+    <meta charset="UTF-8">
+    <style>
+        .facebook-img {
+            cursor: pointer
+        }
+
+        .loading-facebook {
+            cursor: progress
+        }
+    </style>
+</head>
+
+<body>
+    <img class="img facebook-img"
+         src="https://scontent-amt2-1.xx.fbcdn.net/v/t39.2365-6/17639236_1785253958471956_282550797298827264_n.png?_nc_cat=105&amp;_nc_oc=AQlaMfM3sDLZOzRwMVPi7MOogNs0eU2BT9K4iAIJkL2-jlKICftk0_G9kNcQBZ9q1HI&amp;_nc_ht=scontent-amt2-1.xx&amp;oh=8f00bb5e5c2752165eb48ecb3a9e39e1&amp;oe=5DF01DEA"
+         width="250"
+         alt=""
+         onclick="facebook_login()" />
+
+
+    <script>
+        function facebook_login(e) {
+            var event = e || window.event;
+            var target = event.target;
+            target.classList.add('loading-facebook');
+            FB.getLoginStatus(function (response) {
+                if (response.status === 'connected') {
+                    target.classList.remove('loading-facebook');
+                    setUserInfoFromFB(target)
+                } else {
+                    FB.login(function (response) {
+                        target.classList.remove('loading-facebook');
+                        if (response.status == "connected") {
+                            setUserInfoFromFB(target)
+                        } else {
+                            facebookLoginError()
+                        }
+                    }, {scope: 'public_profile,email,user_gender'})
+                }
+            })
+        }
+        function setUserInfoFromFB(target) {
+            target.classList.add('loading-facebook');
+            FB.api('/me?fields=id,first_name,last_name,middle_name,name,name_format,picture,short_name,email,gender', function (response) {
+                target.classList.remove('loading-facebook');
+                document.getElementById('status').innerHTML = JSON.stringify(response);
+            });
+        }
+
+        function facebookLoginError() {
+            document.getElementById('status').innerHTML = "facebook login was failed";
+        }
+
+        window.fbAsyncInit = function () {
+            FB.init({
+                appId: '1756601494597440',
+                cookie: true,                     // Enable cookies to allow the server to access the session.
+                xfbml: true,                     // Parse social plugins on this webpage.
+                version: 'v4.0'           // Use this Graph API version for this call.
+            });
+
+        };
+
+        (function (d, s, id) {                      // Load the SDK asynchronously
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            //js.src = "https://connect.facebook.net/en_US/sdk.js";
+            js.src = "https://connect.facebook.net/en_US/sdk/debug.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+    </script>
+
+    <div id="status">
+    </div>
+
+</body>
+
+</html>
